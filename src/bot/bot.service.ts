@@ -52,7 +52,7 @@ export class BotService implements OnModuleInit {
 
         this.getDeletedNotifs(chatId)
       } else if ([' м.', ' ч.', ' д.'].indexOf(message.slice(-3)) != -1) {
-        await this.createJob(message, chatId)
+        await this.createJob(message, chatId, this.phaseService.getCity())
 
         this.phaseService.setBotPhase('/start')
       }  else  {
@@ -115,7 +115,7 @@ export class BotService implements OnModuleInit {
     })
     this.phaseService.setMessageId(data.message_id)
   }
-  private async createJob(q: string, chatId: number){
+  private async createJob(q: string, chatId: number, city: string){
     const amount_num = parseInt(q)
     if (!amount_num) {
       await this.bot.sendMessage(chatId, 'Ошибка формата: число не определено')
@@ -133,7 +133,6 @@ export class BotService implements OnModuleInit {
       await this.bot.sendMessage(chatId, 'Ошибка формата: дата не определена')
       return
     }
-    const city = this.phaseService.getCity()
     const job = await this.dbService.createJob(chatId, q, city, interval)
     this.cronService.addInterval(job.id, interval, async () => {
 
