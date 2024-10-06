@@ -138,6 +138,7 @@ export class BotService implements OnModuleInit {
 
       const coords = await this.weatherService.getCoordsByCity(city)
       console.log('ihg ' + city)
+      console.log(coords)
       if (typeof coords == 'string') {
         await this.bot.sendMessage(chatId, 'Извините, возникла проблема при получении погоды')
       } else {

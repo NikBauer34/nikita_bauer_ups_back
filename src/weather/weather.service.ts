@@ -21,7 +21,7 @@ export class WeatherService {
   }
   async getWeatherByCity(lat: number, lon: number) {
     try {
-      const weather = await axios.get<getWeatherDto>('https://api.openweathermap.org/data/2.5/weather?lat=59.764631&lon=60.1936117&appid=cad7ec124945dcfff04e457e76760d90&lang=ru')
+      const weather = await axios.get<getWeatherDto>(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=cad7ec124945dcfff04e457e76760d90&lang=ru`)
       return {
         description: this.capitalizeFirstLetter(weather.data.weather[0].description) as string,
         temp: Math.round(weather.data.main.temp - 273),
