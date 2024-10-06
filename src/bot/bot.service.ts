@@ -137,6 +137,7 @@ export class BotService implements OnModuleInit {
     this.cronService.addInterval(job.id, interval, async () => {
 
       const coords = await this.weatherService.getCoordsByCity(city)
+      console.log('ihg ' + city)
       if (typeof coords == 'string') {
         await this.bot.sendMessage(chatId, 'Извините, возникла проблема при получении погоды')
       } else {
