@@ -9,9 +9,6 @@ import { WeatherModule } from './weather/weather.module';
 import { PhaseModule } from './phase/phase.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: '.env'
-    }),
     BotModule,
     CronModule,
     DbModule,
