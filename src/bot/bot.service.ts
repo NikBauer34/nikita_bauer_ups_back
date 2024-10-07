@@ -51,10 +51,6 @@ export class BotService implements OnModuleInit {
       } else if (message == '/delete_notif') {
 
         this.getDeletedNotifs(chatId)
-      } else if ([' м.', ' ч.', ' д.'].indexOf(message.slice(-3)) != -1) {
-        await this.createJob(message, chatId, this.phaseService.getCity())
-
-        this.phaseService.setBotPhase('/start')
       }  else  {
         if (this.phaseService.getBotPhase() == '/create_notif_city') {
           this.phaseService.setBotPhase('/create_notif_city')
@@ -65,8 +61,16 @@ export class BotService implements OnModuleInit {
             this.phaseService.setBotPhase('/create_notif_city')
           } else {
             this.getInterval(chatId)
+            this.phaseService.setBotPhase('/create_notif_time')
+          }
+        } else if(this.phaseService.getBotPhase() == '/create_notif_time') {
+          const clouse = await this.createJob(message, chatId, this.phaseService.getCity())
+          if (!clouse) {
+            this.phaseService.setBotPhase('/create_notif_time')
+          } else {
             this.phaseService.setBotPhase('/start')
           }
+        this.phaseService.setBotPhase('/start')
         }
       }
     })
@@ -118,20 +122,28 @@ export class BotService implements OnModuleInit {
   private async createJob(q: string, chatId: number, city: string){
     const amount_num = parseInt(q)
     if (!amount_num) {
-      await this.bot.sendMessage(chatId, 'Ошибка формата: число не определено')
-      return
+      await this.bot.sendMessage(chatId, 'Ошибка формата: число не определено, напишите правильно')
+      return false
     }
+
     let interval = 1
     console.log(amount_num)
     if (q[q.length - 2] == 'м') {
+      console.log('м')
       interval = 1000 * 60 * amount_num
     } else if (q[q.length - 2] == 'ч') {
+      console.log('ч')
       interval = 1000 * 60 * 60 * amount_num
     } else if (q[q.length - 2] == 'д') {
+      console.log('д')
       interval = 1000 * 60 * 60 * 24 * amount_num
     } else {
-      await this.bot.sendMessage(chatId, 'Ошибка формата: дата не определена')
-      return
+      await this.bot.sendMessage(chatId, 'Ошибка формата: дата не определена, напишите правильно')
+      return false
+    }
+    if (interval > 10 ** 9) {
+      await this.bot.sendMessage(chatId, 'Число слишком большое, выберите поменьше')
+      return false
     }
     const job = await this.dbService.createJob(chatId, q, city, interval)
     this.cronService.addInterval(job.id, interval, async () => {
@@ -152,6 +164,7 @@ export class BotService implements OnModuleInit {
     })
     await this.bot.deleteMessage(chatId, this.phaseService.getMessageId())
     await this.bot.sendMessage(chatId, 'Уведомление успешно поставлено!')
+    return true
   }
   private async getNotifs(chatId: number) {
     const jobs = await this.dbService.getJobsByUser(chatId)
