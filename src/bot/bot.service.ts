@@ -27,7 +27,7 @@ export class BotService implements OnModuleInit {
       ]
     )
     this.bot.on('message', async (msg) => {
-
+      console.log(this.phaseService.getBotPhase())
       const chatId = msg.chat.id
       const message = msg.text
 
@@ -64,13 +64,16 @@ export class BotService implements OnModuleInit {
             this.phaseService.setBotPhase('/create_notif_time')
           }
         } else if(this.phaseService.getBotPhase() == '/create_notif_time') {
+          this.phaseService.setBotPhase('/create_notif_time')
           const clouse = await this.createJob(message, chatId, this.phaseService.getCity())
+          
           if (!clouse) {
+            console.log(clouse)
             this.phaseService.setBotPhase('/create_notif_time')
           } else {
             this.phaseService.setBotPhase('/start')
           }
-        this.phaseService.setBotPhase('/start')
+        // this.phaseService.setBotPhase('/start')
         }
       }
     })
